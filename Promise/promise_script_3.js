@@ -1,3 +1,9 @@
+/*
+    A Simnple example of aysnc with a then function and a await call. 
+    testAsync_1 uses the then when its Promise is fulfilled 
+    testAsync_2 uses the await when its Promise is fulfilled 
+*/
+
 function cookFood(menuItem, callback) {
   console.log(`Cooking ${menuItem}...`);
   setTimeout(() => {
@@ -67,7 +73,7 @@ async function testAsync_2() {
   console.log(
     `Async Order using a await placed at ${new Date().toLocaleTimeString()}`,
   );
-  const food = await makeOrder("Pizza").then((food) => {
+  await makeOrder("Pizza").then((food) => {
     const endTime = Date.now();
     const timeTaken = (endTime - startTime) / 1000;
     console.log(`\n⏱️ Order completed in ${timeTaken} seconds`);
