@@ -1,5 +1,5 @@
 /*
-    A Simnple example of aysnc with a then function and a await call. 
+    A Simple example of async with a then function and an await call. 
     testAsync_1 uses the then when its Promise is fulfilled 
     testAsync_2 uses the await when its Promise is fulfilled 
 */
@@ -8,25 +8,38 @@ function cookFood(menuItem, callback) {
   console.log(`Cooking ${menuItem}...`);
   setTimeout(() => {
     const finishedFood = `Delicious ${menuItem}`;
-    console.log(`${finishedFood} is ready!`);
+    console.log(`\n${finishedFood} is ready!`);
     callback(finishedFood);
   }, 2000);
 }
 
 // WITHOUT Promise (callback-based - old way)
 function orderFoodBad(menuItem) {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     cookFood(menuItem, (finishedFood) => {
-      console.log("Better late than never"); //Message comes after the cook
-      resolve(finishedFood);
+      console.log("Better late than never");
+      const randomChance = Math.random();
+      console.log("Random chance:", randomChance);
+      if (randomChance > 0.5) {
+        resolve(finishedFood);
+      } else {
+        reject("SOMETHING IS UNDERCOOKED");
+      }
     });
   });
 }
 
 // WITH Promise (modern way - already returns a promise)
 function orderFoodGood(menuItem) {
+  //////Makes a new instance of Promise, includes a callback of resolve which will get returned from the orderFoodGood call's return
   return new Promise((resolve) => {
-    cookFood(menuItem, resolve);
+    // Define what happens when food is ready
+    const handleFoodReady = (finishedFood) => {
+      console.log("FOOD IS READY");
+      resolve(finishedFood); // Resolve the promise with the food
+    };
+    // Start cooking with our handler
+    cookFood(menuItem, handleFoodReady);
   });
 }
 
@@ -36,48 +49,56 @@ function makeOrder(menuItem) {
   console.log("Random chance:", randomChance);
   if (randomChance > 0.5) {
     console.log("✓ Kitchen takes in order right now");
-    // This returns a promise
-    const promise = orderFoodGood(menuItem);
-    console.log("Returned promise state:", promise);
-    return promise; // Return the promise so .then() works
+    return orderFoodGood(menuItem);
   } else {
     console.log("✗ Kitchen is busy, will take longer...");
-    // This also returns a promise now
-    const promise = orderFoodBad(menuItem);
-    console.log("Returned promise state:", promise);
-    return promise; // Return the promise so .then() works
+    return orderFoodBad(menuItem);
   }
 }
 
-/////////START THE CLOCK
+///////// START THE CLOCK
 console.log("=== TEST START ===");
 const startTime = Date.now();
 
-// Option 1: Using .then()
-
+// Option 1: Using .then() - PROPER error handling
 function testAsync_1() {
   console.log(
-    `Aysnc Order using a then placed at ${new Date().toLocaleTimeString()}`,
+    `Async Order using .then() placed at ${new Date().toLocaleTimeString()}`,
   );
-  makeOrder("Burger").then((food) => {
-    const endTime = Date.now();
-    const timeTaken = (endTime - startTime) / 1000;
-    console.log(`\n⏱️ Order completed in ${timeTaken} seconds`);
-    console.log(`✅ Got my ${food}`);
-  });
+
+  makeOrder("Burger")
+    .then((food) => {
+      const endTime = Date.now();
+      const timeTaken = (endTime - startTime) / 1000;
+      console.log(`\n⏱️ Order completed in ${timeTaken} seconds`);
+      console.log(`✅ Got my ${food}`);
+    })
+    .catch((error) => {
+      const endTime = Date.now();
+      const timeTaken = (endTime - startTime) / 1000;
+      console.log(`\n⏱️ Order failed after ${timeTaken} seconds`);
+      console.log(`❌ Walk away with issue: ${error}`);
+    });
 }
 testAsync_1();
 
 // Option 2: Using async/await
 async function testAsync_2() {
   console.log(
-    `Async Order using a await placed at ${new Date().toLocaleTimeString()}`,
+    `Async Order using await placed at ${new Date().toLocaleTimeString()}`,
   );
-  await makeOrder("Pizza").then((food) => {
+
+  try {
+    const food = await makeOrder("Pizza"); // ✅ Just await, no .then()
     const endTime = Date.now();
     const timeTaken = (endTime - startTime) / 1000;
     console.log(`\n⏱️ Order completed in ${timeTaken} seconds`);
-    console.log(`✅ Got my ${food}`);
-  });
+    console.log(`✅ Got my ${food}\n`);
+  } catch (error) {
+    const endTime = Date.now();
+    const timeTaken = (endTime - startTime) / 1000;
+    console.log(`\n⏱️ Order failed after ${timeTaken} seconds`);
+    console.log(`❌ Walk away with issue: ${error}`);
+  }
 }
 testAsync_2();
