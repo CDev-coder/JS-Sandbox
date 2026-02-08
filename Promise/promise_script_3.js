@@ -11,7 +11,7 @@ function cookFood(menuItem, callback) {
 function orderFoodBad(menuItem) {
   return new Promise((resolve) => {
     cookFood(menuItem, (finishedFood) => {
-      console.log("Better late than never");
+      console.log("Better late than never"); //Message comes after the cook
       resolve(finishedFood);
     });
   });
@@ -28,7 +28,6 @@ function makeOrder(menuItem) {
   console.log("\n=== Making order for:", menuItem, "===");
   const randomChance = Math.random();
   console.log("Random chance:", randomChance);
-
   if (randomChance > 0.5) {
     console.log("✓ Kitchen takes in order right now");
     // This returns a promise
@@ -44,25 +43,35 @@ function makeOrder(menuItem) {
   }
 }
 
-// Test it properly
+/////////START THE CLOCK
 console.log("=== TEST START ===");
+const startTime = Date.now();
 
 // Option 1: Using .then()
-makeOrder("Burger")
-  .then((food) => {
-    console.log("\n✅ Got my", food);
-    console.log("Enjoy your meal!");
-  })
-  .catch((error) => {
-    console.log("\n❌ Error:", error);
+
+function testAsync_1() {
+  console.log(
+    `Aysnc Order using a then placed at ${new Date().toLocaleTimeString()}`,
+  );
+  makeOrder("Burger").then((food) => {
+    const endTime = Date.now();
+    const timeTaken = (endTime - startTime) / 1000;
+    console.log(`\n⏱️ Order completed in ${timeTaken} seconds`);
+    console.log(`✅ Got my ${food}`);
   });
-
-console.log("Waiting for food... (this logs immediately)");
-
-// Option 2: Using async/await (run this separately)
-async function testAsync() {
-  console.log("\n=== ASYNC TEST ===");
-  const food = await makeOrder("Pizza");
-  console.log("\n✅ Got my", food);
 }
-// testAsync();
+testAsync_1();
+
+// Option 2: Using async/await
+async function testAsync_2() {
+  console.log(
+    `Async Order using a await placed at ${new Date().toLocaleTimeString()}`,
+  );
+  const food = await makeOrder("Pizza").then((food) => {
+    const endTime = Date.now();
+    const timeTaken = (endTime - startTime) / 1000;
+    console.log(`\n⏱️ Order completed in ${timeTaken} seconds`);
+    console.log(`✅ Got my ${food}`);
+  });
+}
+testAsync_2();
